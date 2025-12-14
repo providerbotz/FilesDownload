@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Authentication Container -->
+    <div id="auth-container" class="flex-grow flex items-center justify-center p-4 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <!-- Auth Header -->
+            <div class="px-8 py-6 bg-slate-50 border-b border-slate-100 text-center">
+                <h2 class="text-2xl font-bold text-slate-800">Welcome Back</h2>
+                <p class="text-sm text-slate-500 mt-1">Please login to continue</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-slate-200">
+                <button id="tab-login" class="w-1/2 py-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none transition-colors">Login</button>
+                <button id="tab-register" class="w-1/2 py-3 text-sm font-medium text-slate-500 hover:text-indigo-600 focus:outline-none transition-colors">Register</button>
+            </div>
+
+            <div class="p-8">
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                        <input type="email" id="login-email" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="name@example.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                        <input type="password" id="login-password" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition duration-300">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Register Form (Hidden) -->
+                <form id="register-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                        <input type="email" id="reg-email" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="name@example.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Create Password</label>
+                        <input type="password" id="reg-password" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition duration-300">
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+                    <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-slate-500">Or continue with</span></div>
+                </div>
+
+                <button id="google-login-btn" class="w-full flex items-center justify-center bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-lg shadow-sm transition duration-300">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5 mr-3">
+                    Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard (Admin & User) -->
+    <div id="dashboard-container" class="hidden h-full flex flex-col">
+        <!-- Navigation -->
+        <header class="bg-white border-b border-slate-200 shadow-sm z-10">
+            <div class="container mx-auto px-4 h-16 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-slate-800" id="panel-title">Dashboard</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-email-display" class="text-sm font-medium text-slate-800">user@example.com</p>
+                        <p id="user-role-display" class="text-xs text-slate-500">User</p>
+                    </div>
+                    <button id="sign-out-btn" class="bg-slate-100 hover:bg-red-50 text-red-600 p-2 rounded-lg transition duration-200" title="Sign Out">
+                        <i class="fas fa-sign-out-alt text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow overflow-y-auto bg-slate-50 p-4 sm:p-6">
+            <div class="container mx-auto max-w-6xl">
+                
+                <!-- USER VIEW -->
+<div id="user-view" class="hidden fade-in h-full flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center border border-slate-100 max-w-lg w-full transform transition-all hover:scale-105 duration-300">
+        
+        <!-- Welcome Icon with Pulse Effect -->
+        <div class="relative w-24 h-24 mx-auto mb-6">
+            <div class="absolute inset-0 bg-indigo-100 rounded-full animate-ping opacity-75"></div>
+            <div class="relative w-24 h-24 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center text-4xl shadow-lg">
+                <i class="fas fa-user-astronaut"></i>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-800 mb-3">Hello, User!</h2>
+        <p class="text-slate-500 mb-8 leading-relaxed">
+            You have successfully logged in into your account. To access premium files, watch ads, and manage downloads, please visit the main platform.
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+            <a href="index.html" class="block w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all duration-300 flex items-center justify-center gap-3 group">
+                <span>Go to Main Website</span>
+                <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </a>
+            
+            <button onclick="document.getElementById('sign-out-btn').click()" class="block w-full py-3 px-6 bg-white border-2 border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-300">
+                Log Out
+            </button>
+        </div>
+    </div>
+</div>
+
+                <!-- ADMIN VIEW -->
+                <div id="admin-view" class="hidden space-y-6 fade-in">
+                    
+                    <!-- Stats / Quick Actions Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- General Settings -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="fas fa-cogs"></i></div>
+                                <h3 class="font-semibold text-lg text-slate-800">General Settings</h3>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <label for="timer-duration-setting" class="text-sm font-medium text-slate-600">Wait Timer (Seconds)</label>
+                                <input type="number" id="timer-duration-setting" value="10" min="0" class="flex-1 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <button id="save-settings-btn" class="mt-4 w-full bg-slate-800 text-white py-2 rounded-lg hover:bg-slate-900 transition flex justify-center items-center gap-2">
+                                <i class="fas fa-save"></i> Save Configuration
+                            </button>
+                        </div>
+
+                        <!-- Add Slider -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                                <div class="p-2 bg-green-100 text-green-600 rounded-lg"><i class="fas fa-images"></i></div>
+                                <h3 class="font-semibold text-lg text-slate-800">Add New Slider</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <input type="url" id="slider-image-url" placeholder="Image URL (Required)" class="w-full p-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                                <input type="url" id="slider-link-url" placeholder="Link URL (Optional)" class="w-full p-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                                <button id="add-slider-btn" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2">
+                                    <i class="fas fa-plus-circle"></i> Add Slider
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manage Sliders List -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                         <h3 class="font-semibold text-lg text-slate-800 mb-4">Active Sliders</h3>
+                         <div id="slider-list" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <!-- JS injected -->
+                         </div>
+                    </div>
+
+                    <!-- Ad Management -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                            <div class="p-2 bg-purple-100 text-purple-600 rounded-lg"><i class="fas fa-ad"></i></div>
+                            <h3 class="font-semibold text-lg text-slate-800">Advertisement Integration</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Header Ad (Slot 1)</label>
+                                <textarea id="ad-slot-1" rows="3" class="w-full p-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Middle Ad (Slot 2)</label>
+                                <textarea id="ad-slot-2" rows="3" class="w-full p-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Footer Ad (Slot 3)</label>
+                                <textarea id="ad-slot-3" rows="3" class="w-full p-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"></textarea>
+                            </div>
+                        </div>
+                        <button id="save-ads-btn" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2 w-full sm:w-auto">
+                            <i class="fas fa-save"></i> Update Ads
+                        </button>
+                    </div>
+
+                    <!-- File Management -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i class="fas fa-folder-open"></i></div>
+                                <h3 class="font-semibold text-lg text-slate-800">File Manager</h3>
+                            </div>
+                        </div>
+
+                        <!-- Add File Form -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                            <h4 class="text-sm font-bold text-slate-700 mb-3 uppercase">Create New Entry</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div class="md:col-span-6">
+                                    <input type="text" id="file-title" placeholder="File Title" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <input type="number" id="file-ad-count" placeholder="Ads Qty" value="10" min="1" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="md:col-span-4">
+                                    <input type="url" id="file-thumbnail-url" placeholder="Thumbnail URL" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="md:col-span-12">
+                                    <input type="url" id="file-download-url" placeholder="Download Link URL" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="md:col-span-12">
+                                    <textarea id="file-description" placeholder="Description..." rows="2" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                                </div>
+                                <div class="md:col-span-12">
+                                    <button id="add-file-btn" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                                        <i class="fas fa-upload mr-2"></i> Upload File Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Files Grid -->
+                        <div id="file-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Files loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit File Modal -->
+    <div id="edit-file-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-center justify-center">
+        <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full m-4">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">Edit File</h3>
+                <button id="cancel-edit-btn" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                 <input type="hidden" id="edit-file-id">
+                 <div>
+                     <label class="block text-xs font-bold text-slate-500 mb-1">Title</label>
+                     <input type="text" id="edit-file-title" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                 </div>
+                 <div class="flex gap-4">
+                     <div class="w-1/3">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Ads Count</label>
+                        <input type="number" id="edit-file-ad-count" min="1" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                     </div>
+                     <div class="w-2/3">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Thumbnail</label>
+                        <input type="url" id="edit-file-thumbnail-url" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                     </div>
+                 </div>
+                 <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Download URL</label>
+                    <input type="url" id="edit-file-download-url" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                 </div>
+                 <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Description</label>
+                    <textarea id="edit-file-description" rows="3" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                 </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 rounded-b-xl flex justify-end gap-3">
+                <button id="save-edit-btn" class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 transform transition-all duration-300 translate-y-20 opacity-0 z-50">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+            <i id="toast-icon" class="fas fa-info-circle"></i>
+            <span id="toast-message" class="font-medium">Notification</span>
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, serverTimestamp, query, orderBy, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // CONFIGURATION (UNCHANGED)
+        const firebaseConfig = {
+          apiKey: "Api key",
+          authDomain: "authdomin.firebaseapp.com",
+          projectId: "projectid:67753",
+          storageBucket: "storebucket.firebasestorage.app",
+          messagingSenderId: "55775422568976",
+          appId: "1::web:67765fji479gji58932gkordcb680732gu"
+        };
+        
+        // ADMIN EMAILS
+        const authorizedAdmins = ['demoadmin@gmail.com']; //your firebase auth user (admin) gmail enter
+
+        // INITIALIZE APP
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // UI ELEMENTS
+        const authContainer = document.getElementById('auth-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const adminView = document.getElementById('admin-view');
+        const userView = document.getElementById('user-view');
+        const panelTitle = document.getElementById('panel-title');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const userRoleDisplay = document.getElementById('user-role-display');
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+
+        // TAB SWITCHING LOGIC
+        tabLogin.addEventListener('click', () => {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            tabLogin.classList.add('text-indigo-600', 'border-indigo-600');
+            tabLogin.classList.remove('text-slate-500');
+            tabRegister.classList.remove('text-indigo-600', 'border-indigo-600');
+            tabRegister.classList.add('text-slate-500');
+        });
+
+        tabRegister.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            tabRegister.classList.add('text-indigo-600', 'border-indigo-600');
+            tabRegister.classList.remove('text-slate-500');
+            tabLogin.classList.remove('text-indigo-600', 'border-indigo-600');
+            tabLogin.classList.add('text-slate-500');
+        });
+
+        // AUTH STATE OBSERVER
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                authContainer.classList.add('hidden');
+                dashboardContainer.classList.remove('hidden');
+                userEmailDisplay.textContent = user.email;
+
+                if (authorizedAdmins.includes(user.email)) {
+                    // ADMIN MODE
+                    adminView.classList.remove('hidden');
+                    userView.classList.add('hidden');
+                    panelTitle.textContent = "Admin Panel";
+                    userRoleDisplay.textContent = "Administrator";
+                    loadAdminData();
+                } else {
+                    // USER MODE
+                    adminView.classList.add('hidden');
+                    userView.classList.remove('hidden');
+                    panelTitle.textContent = "User Dashboard";
+                    userRoleDisplay.textContent = "General User";
+                }
+            } else {
+                // LOGGED OUT
+                authContainer.classList.remove('hidden');
+                dashboardContainer.classList.add('hidden');
+                adminView.classList.add('hidden');
+                userView.classList.add('hidden');
+            }
+        });
+
+        // LOGIN ACTIONS
+        document.getElementById('google-login-btn').addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch(handleAuthError);
+        });
+
+        document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            signInWithEmailAndPassword(auth, email, pass).catch(handleAuthError);
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-password').value;
+            createUserWithEmailAndPassword(auth, email, pass)
+                .then(() => showToast("Account created successfully!", "success"))
+                .catch(handleAuthError);
+        });
+
+        function handleAuthError(error) {
+            let msg = error.message;
+            if(error.code === 'auth/invalid-credential') msg = "Invalid email or password.";
+            if(error.code === 'auth/email-already-in-use') msg = "Email is already registered.";
+            showToast(msg, 'error');
+        }
+
+        // --- TOAST NOTIFICATION SYSTEM ---
+        function showToast(message, type = 'default') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            const container = toast.querySelector('div');
+
+            msgEl.textContent = message;
+            
+            // Reset classes
+            container.className = "bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3";
+            iconEl.className = "fas fa-info-circle";
+
+            if (type === 'success') {
+                container.classList.add('bg-green-600');
+                iconEl.className = "fas fa-check-circle";
+            } else if (type === 'error') {
+                container.classList.add('bg-red-600');
+                iconEl.className = "fas fa-exclamation-circle";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        async function handleAsyncButton(button, asyncOperation) {
+            const originalHtml = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
+            try {
+                await asyncOperation();
+                button.innerHTML = `<i class="fas fa-check"></i> Done`;
+            } catch (error) {
+                console.error("Operation failed:", error);
+                button.innerHTML = `<i class="fas fa-times"></i> Error`;
+                showToast('Action failed. Check console.', 'error');
+            } finally {
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
+                }, 2000);
+            }
+        }
+
+        async function loadAdminData() {
+            await Promise.all([
+                loadAdminSettings(),
+                loadAdminAds(),
+                loadAdminSliders(),
+                loadAdminFiles()
+            ]);
+        }
+
+        // --- SETTINGS ---
+        const timerDurationInput = document.getElementById('timer-duration-setting');
+        document.getElementById('save-settings-btn').addEventListener('click', (e) => {
+            const duration = parseInt(timerDurationInput.value);
+            if (duration < 0) return showToast("Timer cannot be negative.", 'error');
+            handleAsyncButton(e.currentTarget, async () => {
+                await setDoc(doc(db, "settings", "general"), { timerDuration: duration });
+                showToast("Settings saved successfully.", 'success');
+            });
+        });
+
+        async function loadAdminSettings() {
+            const docSnap = await getDoc(doc(db, "settings", "general"));
+            timerDurationInput.value = docSnap.exists() ? docSnap.data().timerDuration : 10;
+        }
+
+        // --- ADS ---
+        const ad1 = document.getElementById('ad-slot-1');
+        const ad2 = document.getElementById('ad-slot-2');
+        const ad3 = document.getElementById('ad-slot-3');
+
+        document.getElementById('save-ads-btn').addEventListener('click', (e) => {
+            const adData = { adSlot1: ad1.value, adSlot2: ad2.value, adSlot3: ad3.value };
+            handleAsyncButton(e.currentTarget, async () => {
+                await setDoc(doc(db, "settings", "ads"), adData);
+                showToast("Ad configuration updated.", 'success');
+            });
+        });
+
+        async function loadAdminAds() {
+            const docSnap = await getDoc(doc(db, "settings", "ads"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                ad1.value = data.adSlot1 || '';
+                ad2.value = data.adSlot2 || '';
+                ad3.value = data.adSlot3 || '';
+            }
+        }
+
+        // --- SLIDERS ---
+        const sliderList = document.getElementById('slider-list');
+        document.getElementById('add-slider-btn').addEventListener('click', (e) => {
+            const imageUrl = document.getElementById('slider-image-url').value;
+            const linkUrl = document.getElementById('slider-link-url').value;
+            if (!imageUrl) return showToast("Image URL is required.", 'error');
+            
+            handleAsyncButton(e.currentTarget, async () => {
+                await addDoc(collection(db, "sliders"), { imageUrl, linkUrl: linkUrl || "", createdAt: serverTimestamp() });
+                showToast("Slider added.", 'success');
+                document.getElementById('slider-image-url').value = '';
+                document.getElementById('slider-link-url').value = '';
+                loadAdminSliders();
+            });
+        });
+
+        async function loadAdminSliders() {
+            sliderList.innerHTML = '<div class="col-span-full text-center text-slate-500 py-4"><i class="fas fa-spinner fa-spin"></i> Loading sliders...</div>';
+            const q = query(collection(db, "sliders"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            sliderList.innerHTML = '';
+            
+            if(querySnapshot.empty) {
+                sliderList.innerHTML = '<div class="col-span-full text-center text-slate-400 text-sm italic">No active sliders found.</div>';
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const s = doc.data();
+                const div = document.createElement('div');
+                div.className = 'relative group border rounded-lg overflow-hidden bg-slate-50';
+                div.innerHTML = `
+                    <img src="${s.imageUrl}" class="w-full h-24 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+                        <button data-id="${doc.id}" class="delete-slider-btn bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transform scale-0 group-hover:scale-100 transition shadow-lg">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                sliderList.appendChild(div);
+            });
+        }
+        
+        sliderList.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.delete-slider-btn');
+            if (btn && confirm("Delete this slider permanently?")) {
+                await deleteDoc(doc(db, "sliders", btn.dataset.id));
+                showToast("Slider deleted.", 'success');
+                loadAdminSliders();
+            }
+        });
+
+        // --- FILES ---
+        const fileList = document.getElementById('file-list');
+        document.getElementById('add-file-btn').addEventListener('click', (e) => {
+            const title = document.getElementById('file-title').value;
+            const thumb = document.getElementById('file-thumbnail-url').value;
+            const desc = document.getElementById('file-description').value;
+            const down = document.getElementById('file-download-url').value;
+            const ads = parseInt(document.getElementById('file-ad-count').value);
+
+            if (!title || !thumb || !desc || !down || !ads) return showToast("All file fields are required.", 'error');
+            
+            handleAsyncButton(e.currentTarget, async () => {
+                await addDoc(collection(db, "files"), { 
+                    title, thumbnailUrl: thumb, description: desc, 
+                    downloadUrl: down, requiredAds: ads, createdAt: serverTimestamp() 
+                });
+                showToast("File uploaded successfully.", 'success');
+                // Clear form
+                document.getElementById('file-title').value = '';
+                document.getElementById('file-thumbnail-url').value = '';
+                document.getElementById('file-description').value = '';
+                document.getElementById('file-download-url').value = '';
+                document.getElementById('file-ad-count').value = 10;
+                loadAdminFiles();
+            });
+        });
+
+        async function loadAdminFiles() {
+            fileList.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10"><i class="fas fa-spinner fa-spin text-2xl"></i><br>Loading files...</div>';
+            const q = query(collection(db, "files"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            fileList.innerHTML = '';
+            
+            if(querySnapshot.empty) {
+                fileList.innerHTML = '<div class="col-span-full text-center text-slate-400 italic py-6">No files uploaded yet.</div>';
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const f = doc.data();
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col hover:shadow-md transition';
+                div.innerHTML = `
+                    <div class="h-32 bg-slate-100 relative overflow-hidden group">
+                        <img src="${f.thumbnailUrl}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-slate-900 bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                            ${f.requiredAds} Ads
+                        </div>
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col">
+                        <h3 class="font-bold text-slate-800 text-lg mb-1 truncate">${f.title}</h3>
+                        <p class="text-sm text-slate-500 line-clamp-2 mb-4 flex-grow">${f.description}</p>
+                        <div class="flex gap-2 mt-auto">
+                            <button data-id="${doc.id}" class="edit-file-btn flex-1 bg-amber-500 hover:bg-amber-600 text-white py-1.5 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button data-id="${doc.id}" class="delete-file-btn flex-1 bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+                fileList.appendChild(div);
+            });
+        }
+
+        // --- EDIT MODAL ---
+        const editModal = document.getElementById('edit-file-modal');
+        
+        fileList.addEventListener('click', async (e) => {
+            const delBtn = e.target.closest('.delete-file-btn');
+            const editBtn = e.target.closest('.edit-file-btn');
+
+            if (delBtn) {
+                if (confirm("Are you sure you want to delete this file?")) {
+                    await deleteDoc(doc(db, "files", delBtn.dataset.id));
+                    showToast("File deleted.", 'success');
+                    loadAdminFiles();
+                }
+            } else if (editBtn) {
+                const id = editBtn.dataset.id;
+                const snap = await getDoc(doc(db, "files", id));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('edit-file-id').value = id;
+                    document.getElementById('edit-file-title').value = data.title;
+                    document.getElementById('edit-file-ad-count').value = data.requiredAds;
+                    document.getElementById('edit-file-thumbnail-url').value = data.thumbnailUrl;
+                    document.getElementById('edit-file-description').value = data.description;
+                    document.getElementById('edit-file-download-url').value = data.downloadUrl;
+                    editModal.classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('cancel-edit-btn').addEventListener('click', () => editModal.classList.add('hidden'));
+
+        document.getElementById('save-edit-btn').addEventListener('click', (e) => {
+            const id = document.getElementById('edit-file-id').value;
+            const data = {
+                title: document.getElementById('edit-file-title').value,
+                requiredAds: parseInt(document.getElementById('edit-file-ad-count').value),
+                thumbnailUrl: document.getElementById('edit-file-thumbnail-url').value,
+                description: document.getElementById('edit-file-description').value,
+                downloadUrl: document.getElementById('edit-file-download-url').value
+            };
+
+            if (!data.title || !data.thumbnailUrl) return showToast("Fields cannot be empty.", 'error');
+
+            handleAsyncButton(e.currentTarget, async () => {
+                await updateDoc(doc(db, "files", id), data);
+                showToast("File updated successfully.", 'success');
+                editModal.classList.add('hidden');
+                loadAdminFiles();
+            });
+        });
+
+    </script>
+</body>
+</html>

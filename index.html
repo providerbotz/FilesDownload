@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Downloader - Premium Downloader</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Ad SDK (Updated to match ID consistency) -->
+    <script src='//libtl.com/sdk.js' data-zone='10075117' data-sdk='show_10075117'></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        
+        /* Smooth Scroll & Scrollbar Hide */
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animations */
+        .fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+
+        /* Slider Styling */
+        .slider-wrapper { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .slider-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.3s ease; cursor: pointer; }
+        .slider-dot.active { width: 24px; background: #fff; border-radius: 10px; }
+
+        /* Glass Effect */
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Navbar / Header -->
+    <nav class="fixed top-0 w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl">
+            <div class="flex items-center gap-2">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                    <i class="fas fa-cloud-download-alt text-xl"></i>
+                </div>
+                <h1 data-key="main_title" class="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                    File Downloader
+                </h1>
+            </div>
+            <button onclick="document.getElementById('language-modal').classList.remove('hidden')" class="text-slate-500 hover:text-indigo-600 transition">
+                <i class="fas fa-language text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="app" class="container mx-auto px-4 pt-24 pb-10 max-w-7xl min-h-screen flex flex-col">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-10 fade-in-up">
+            <h2 data-key="main_subtitle" class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 leading-tight">
+                Watch Ads, Unlock, and <br><span class="text-indigo-600">Download Premium Files</span>
+            </h2>
+            
+            <!-- Search Bar -->
+            <div class="max-w-xl mx-auto mt-8 relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                </div>
+                <input type="text" id="searchInput" data-key-placeholder="search_placeholder" 
+                    placeholder="Search for files..." 
+                    class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-full shadow-lg shadow-indigo-100 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all text-slate-700 placeholder-slate-400">
+            </div>
+        </div>
+
+        <!-- Image Slider -->
+        <div id="slider" class="relative w-full h-48 md:h-[400px] rounded-2xl overflow-hidden shadow-2xl mb-12 fade-in-up delay-100 group">
+            <div id="slider-wrapper" class="slider-wrapper h-full">
+                <!-- Slides injected via JS -->
+            </div>
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+            <!-- Dots -->
+            <div id="slider-dots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10"></div>
+        </div>
+
+        <!-- Files Section -->
+        <div class="fade-in-up delay-200 mb-auto">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="h-8 w-1 bg-indigo-600 rounded-full"></div>
+                <h2 data-key="available_files" class="text-2xl font-bold text-slate-800">Available Files</h2>
+            </div>
+            
+            <div id="files-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Cards injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="no-results" class="hidden text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100 mt-6">
+                <div class="bg-indigo-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-search-minus text-3xl text-indigo-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-slate-700 mb-2">No files found</h3>
+                <p data-key="no_results_text" class="text-slate-500">We couldn't find any matches for your search.</p>
+            </div>
+        </div>
+        
+        <!-- Footer with Ad Slots -->
+    <footer class="bg-[var(--bg-secondary)] py-6 mt-10 border-t border-gray-700">
+        <div class="container mx-auto px-4">
+            <p class="text-center text-gray-500">&copy; 2025 File Downloader. Created by <a href="https://t.me/codelibraryofficial" style="color: #FFA500; text-decoration: none;">Code Library</a>.
+</div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-500">
+        <div class="bg-slate-800 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 max-w-sm">
+            <div class="bg-indigo-500 rounded-full p-2 flex-shrink-0">
+                <i class="fas fa-info text-white text-sm w-4 h-4 flex items-center justify-center"></i>
+            </div>
+            <p id="toast-message" class="text-sm font-medium">Notification Message</p>
+        </div>
+    </div>
+    
+    <!-- Language Selection Modal -->
+    <div id="language-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center transform scale-100 transition-transform">
+            <div class="mb-6">
+                <i class="fas fa-globe text-4xl text-indigo-600 mb-3"></i>
+                <h2 class="text-2xl font-bold text-slate-800">Select Language</h2>
+                <p class="text-slate-500 mt-2">Choose your preferred language to continue</p>
+            </div>
+            <div class="grid gap-3">
+                <button class="lang-btn group flex items-center justify-between px-6 py-4 rounded-xl border border-slate-200 hover:border-indigo-600 hover:bg-indigo-50 transition-all" data-lang="en">
+                    <span class="font-semibold text-slate-700 group-hover:text-indigo-700">English</span>
+                    <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-600"></i>
+                </button>
+                <button class="lang-btn group flex items-center justify-between px-6 py-4 rounded-xl border border-slate-200 hover:border-indigo-600 hover:bg-indigo-50 transition-all" data-lang="hi">
+                    <span class="font-semibold text-slate-700 group-hover:text-indigo-700">हिन्दी (Hindi)</span>
+                    <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-600"></i>
+                </button>
+                <button class="lang-btn group flex items-center justify-between px-6 py-4 rounded-xl border border-slate-200 hover:border-indigo-600 hover:bg-indigo-50 transition-all" data-lang="bn">
+                    <span class="font-semibold text-slate-700 group-hover:text-indigo-700">বাংলা (Bengali)</span>
+                    <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-600"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "Api key",
+          authDomain: "authdomin.firebaseapp.com",
+          projectId: "projectid:67753",
+          storageBucket: "storebucket.firebasestorage.app",
+          messagingSenderId: "55775422568976",
+          appId: "1::web:67765fji479gji58932gkordcb680732gu"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        const sliderDotsContainer = document.getElementById('slider-dots');
+        const filesGrid = document.getElementById('files-grid');
+        const searchInput = document.getElementById('searchInput');
+        const noResultsMessage = document.getElementById('no-results');
+        const languageModal = document.getElementById('language-modal');
+
+        let sliderInterval;
+        let currentSlide = 0;
+        let timerDuration = 10;
+        let currentLang = 'en';
+
+        const translations = {
+            en: { main_title: "File Downloader", main_subtitle: "Watch Ads, Unlock, and Download Premium Files", search_placeholder: "Search for files...", available_files: "Available Files", no_results_text: "We couldn't find any matches for your search.", no_slides: "No promotional slides available.", slides_error: "Could not load slides.", no_files_uploaded: "No files have been uploaded yet.", files_error: "Could not load files. Please try again later.", unlock_button: "Unlock File ({adCount}/{requiredCount})", download_now_button: "Download Now", toast_download_starting: "Starting your download...", toast_progress: "Ad watched! Progress: {adCount}/{requiredCount}", toast_unlocked: "File unlocked successfully!", toast_ad_error: "Failed to load ad. Please try again.", loading_ad: "Loading Ad...", verifying_button: "Wait {countdown}s...", },
+            hi: { main_title: "File Downloader", main_subtitle: "विज्ञापन देखें, अनलॉक करें और प्रीमियम फाइलें डाउनलोड करें", search_placeholder: "फ़ाइलें खोजें...", available_files: "उपलब्ध फाइलें", no_results_text: "आपकी खोज से कोई फ़ाइल मेल नहीं खाती।", no_slides: "कोई स्लाइड उपलब्ध नहीं है।", slides_error: "स्लाइड लोड नहीं हो सकीं।", no_files_uploaded: "अभी तक कोई फ़ाइल अपलोड नहीं की गई है।", files_error: "फ़ाइलें लोड नहीं हो सकीं।", unlock_button: "अनलॉक करें ({adCount}/{requiredCount})", download_now_button: "डाउनलोड करें", toast_download_starting: "डाउनलोड शुरू हो रहा है...", toast_progress: "प्रगति: {adCount}/{requiredCount}", toast_unlocked: "फाइल अनलॉक हो गई!", toast_ad_error: "विज्ञापन लोड नहीं हुआ।", loading_ad: "विज्ञापन लोड हो रहा है...", verifying_button: "प्रतीक्षा करें {countdown}s", },
+            bn: { main_title: "File Downloader", main_subtitle: "বিজ্ঞাপন দেখুন, আনলক করুন এবং ফাইল ডাউনলোড করুন", search_placeholder: "ফাইল অনুসন্ধান করুন...", available_files: "উপলব্ধ ফাইল", no_results_text: "আপনার অনুসন্ধানের সাথে কোন ফাইল পাওয়া যায়নি।", no_slides: "কোন স্লাইড উপলব্ধ নেই।", slides_error: "স্লাইড লোড করা যায়নি।", no_files_uploaded: "এখনো কোনো ফাইল আপলোড করা হয়নি।", files_error: "ফাইল লোড করা যায়নি।", unlock_button: "আনলক করুন ({adCount}/{requiredCount})", download_now_button: "ডাউনলোড করুন", toast_download_starting: "ডাউনলোড শুরু হচ্ছে...", toast_progress: "অগ্রগতি: {adCount}/{requiredCount}", toast_unlocked: "ফাইল আনলক হয়েছে!", toast_ad_error: "বিজ্ঞাপন লোড করা যায়নি।", loading_ad: "লোড হচ্ছে...", verifying_button: "অপেক্ষা করুন {countdown}s", }
+        };
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            localStorage.setItem('userLanguage', lang);
+            document.querySelectorAll('[data-key]').forEach(elem => {
+                const key = elem.getAttribute('data-key');
+                if (translations[lang][key]) elem.innerHTML = translations[lang][key];
+            });
+            document.querySelectorAll('[data-key-placeholder]').forEach(elem => {
+                const key = elem.getAttribute('data-key-placeholder');
+                if (translations[lang][key]) elem.placeholder = translations[lang][key];
+            });
+            languageModal.classList.add('hidden');
+            loadUserPageData();
+        }
+
+        function getText(key, params = {}) {
+            let text = translations[currentLang][key] || key;
+            for (const param in params) text = text.replace(`{${param}}`, params[param]);
+            return text;
+        }
+
+        function showToast(key, params = {}) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = getText(key, params);
+            toast.classList.remove('opacity-0', 'translate-y-24');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-24');
+            }, 3000);
+        }
+
+        function renderAd(containerId, adCode) {
+            if (!adCode) return;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = adCode;
+            const scripts = Array.from(container.getElementsByTagName('script'));
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        }
+
+        async function loadBannerAds() {
+            try {
+                const docRef = doc(db, "settings", "ads");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const adData = docSnap.data();
+                    renderAd('ad-container-1', adData.adSlot1);
+                    renderAd('ad-container-2', adData.adSlot2);
+                    renderAd('ad-container-3', adData.adSlot3);
+                }
+            } catch (error) {
+                console.error("Error loading banner ads:", error);
+            }
+        }
+
+        async function loadUserPageData() {
+            loadBannerAds();
+            try {
+                const settingsRef = doc(db, "settings", "general");
+                const docSnap = await getDoc(settingsRef);
+                if (docSnap.exists()) {
+                    timerDuration = docSnap.data().timerDuration || 10;
+                }
+            } catch (error) {
+                console.error("Using default settings.", error);
+            }
+
+            // Load Slider
+            try {
+                const q = query(collection(db, "sliders"), orderBy("createdAt", "desc"));
+                const sliderSnapshot = await getDocs(q);
+                sliderWrapper.innerHTML = '';
+                sliderDotsContainer.innerHTML = '';
+                const slides = [];
+                sliderSnapshot.forEach(doc => slides.push(doc.data()));
+                if (slides.length > 0) {
+                    slides.forEach((slide, index) => {
+                        const slideEl = document.createElement('div');
+                        slideEl.className = 'min-w-full h-full';
+                        const imageHTML = `<img src="${slide.imageUrl}" class="w-full h-full object-cover" alt="Slide">`;
+                        slideEl.innerHTML = slide.linkUrl ? `<a href="${slide.linkUrl}" target="_blank" class="block w-full h-full">${imageHTML}</a>` : imageHTML;
+                        sliderWrapper.appendChild(slideEl);
+                        
+                        const dotEl = document.createElement('div');
+                        dotEl.className = `slider-dot ${index === 0 ? 'active' : ''}`;
+                        dotEl.dataset.index = index;
+                        sliderDotsContainer.appendChild(dotEl);
+                    });
+                    setupSlider(slides.length);
+                } else {
+                    sliderWrapper.innerHTML = `<div class="min-w-full h-full flex items-center justify-center bg-slate-200"><p class="text-slate-500">${getText('no_slides')}</p></div>`;
+                }
+            } catch (error) {
+                sliderWrapper.innerHTML = `<div class="min-w-full h-full flex items-center justify-center bg-red-50"><p class="text-red-500">${getText('slides_error')}</p></div>`;
+            }
+            
+            // Load Files
+            try {
+                const q = query(collection(db, "files"), orderBy("createdAt", "desc"));
+                const filesSnapshot = await getDocs(q);
+                filesGrid.innerHTML = '';
+                if (filesSnapshot.empty) {
+                    filesGrid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10">${getText('no_files_uploaded')}</p>`;
+                    return;
+                }
+                
+                filesSnapshot.forEach(doc => {
+                    const file = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'file-card bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 overflow-hidden transition-all duration-300 transform hover:-translate-y-1 group flex flex-col h-full';
+                    card.dataset.title = file.title.toLowerCase();
+                    card.dataset.description = file.description.toLowerCase();
+                    
+                    card.innerHTML = `
+                        <div class="relative overflow-hidden aspect-video">
+                            <img src="${file.thumbnailUrl}" alt="${file.title}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/e2e8f0/64748b?text=No+Image'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-1" title="${file.title}">${file.title}</h3>
+                            <p class="text-slate-500 text-sm mb-6 line-clamp-2 flex-grow">${file.description}</p>
+                            
+                            <button data-id="${doc.id}" data-url="${file.downloadUrl}" data-required-ads="${file.requiredAds || 10}" 
+                                class="download-btn w-full py-3 px-4 rounded-xl font-semibold text-sm shadow-md transition-all duration-300 flex items-center justify-center gap-2 mt-auto">
+                                <i class="fas"></i>
+                                <span></span>
+                            </button>
+                        </div>
+                    `;
+                    filesGrid.appendChild(card);
+                    updateButtonState(card.querySelector('.download-btn'));
+                });
+            } catch (error) {
+                console.error(error);
+                filesGrid.innerHTML = `<p class="col-span-full text-center text-red-400">${getText('files_error')}</p>`;
+            }
+        }
+
+        function setupSlider(slideCount) {
+            if (slideCount <= 1) return;
+            const dots = document.querySelectorAll('.slider-dot');
+            function goToSlide(slideIndex) {
+                currentSlide = (slideIndex + slideCount) % slideCount;
+                sliderWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+                dots.forEach(dot => dot.classList.remove('active'));
+                if(dots[currentSlide]) dots[currentSlide].classList.add('active');
+            }
+            if (sliderInterval) clearInterval(sliderInterval);
+            sliderInterval = setInterval(() => goToSlide(currentSlide + 1), 4000);
+            dots.forEach(dot => dot.addEventListener('click', (e) => {
+                goToSlide(parseInt(e.target.dataset.index));
+                clearInterval(sliderInterval);
+                sliderInterval = setInterval(() => goToSlide(currentSlide + 1), 4000);
+            }));
+        }
+
+        function updateButtonState(button) {
+            const fileId = button.dataset.id;
+            const requiredCount = parseInt(button.dataset.requiredAds);
+            const adCount = parseInt(localStorage.getItem(`adCount_${fileId}`) || 0);
+            const isUnlocked = adCount >= requiredCount;
+            const btnSpan = button.querySelector('span');
+            const btnIcon = button.querySelector('i');
+            
+            button.disabled = false;
+            
+            // Remove old classes
+            button.className = "download-btn w-full py-3 px-4 rounded-xl font-semibold text-sm shadow-lg transition-all duration-300 flex items-center justify-center gap-2 mt-auto transform active:scale-95";
+
+            if (isUnlocked) {
+                btnSpan.textContent = getText('download_now_button');
+                btnIcon.className = 'fas fa-cloud-download-alt';
+                button.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'text-white', 'shadow-emerald-200');
+            } else {
+                btnSpan.textContent = getText('unlock_button', { adCount, requiredCount });
+                btnIcon.className = 'fas fa-lock';
+                button.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'text-white', 'shadow-indigo-200');
+            }
+        }
+
+        async function processAdUnlock(button) {
+            button.disabled = true;
+            const btnSpan = button.querySelector('span');
+            const btnIcon = button.querySelector('i');
+            const fileId = button.dataset.id;
+            const requiredCount = parseInt(button.dataset.requiredAds);
+            let adCount = parseInt(localStorage.getItem(`adCount_${fileId}`) || 0);
+
+            try {
+                btnSpan.textContent = getText('loading_ad');
+                btnIcon.className = 'fas fa-circle-notch fa-spin';
+                
+                // CORRECTED: Call the function that matches the SDK script tag ID
+                if (typeof show_10075117 === 'function') {
+                    await show_10075117();
+                } else if (typeof show_9745051 === 'function') {
+                    // Fallback to the ID you originally provided if the script tag changed
+                    await show_9745051();
+                } else {
+                    console.error("Ad SDK function not found. Check script tag data-sdk.");
+                    // Simulate for testing if script is blocked
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                adCount++;
+                localStorage.setItem(`adCount_${fileId}`, adCount);
+                
+                if (adCount >= requiredCount) {
+                    showToast('toast_unlocked');
+                    updateButtonState(button);
+                    return;
+                }
+                
+                showToast('toast_progress', { adCount, requiredCount });
+                
+                let countdown = timerDuration;
+                button.classList.remove('bg-indigo-600');
+                button.classList.add('bg-slate-400', 'cursor-not-allowed');
+                
+                const timerInterval = setInterval(() => {
+                    btnSpan.textContent = getText('verifying_button', { countdown });
+                    countdown--;
+                    if (countdown < 0) {
+                        clearInterval(timerInterval);
+                        updateButtonState(button);
+                    }
+                }, 1000);
+
+            } catch (err) {
+                console.error("Ad error:", err);
+                showToast('toast_ad_error');
+                updateButtonState(button);
+            }
+        }
+
+        filesGrid.addEventListener('click', (e) => {
+            const button = e.target.closest('.download-btn');
+            if (!button || button.disabled) return;
+            
+            const isUnlocked = button.classList.contains('bg-emerald-500');
+            
+            if (isUnlocked) {
+                showToast('toast_download_starting');
+                window.open(button.dataset.url, '_blank');
+            } else {
+                processAdUnlock(button);
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.file-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const match = card.dataset.title.includes(term) || card.dataset.description.includes(term);
+                card.style.display = match ? 'flex' : 'none';
+                if(match) visibleCount++;
+            });
+            
+            noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+        });
+
+        window.addEventListener('load', () => {
+            const savedLang = localStorage.getItem('userLanguage');
+            if (savedLang && translations[savedLang]) {
+                applyLanguage(savedLang);
+            } else {
+                languageModal.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
